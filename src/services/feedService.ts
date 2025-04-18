@@ -29,7 +29,7 @@ export interface Feed {
 }
 
 export const fetchFeeds = async (): Promise<Feed[]> => {
-  const response = await fetch('/feeds/');
+  const response = await fetch('http://localhost:8000/feeds/');
   if (!response.ok) {
     throw new Error('Failed to fetch feeds');
   }
