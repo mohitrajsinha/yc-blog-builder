@@ -1,4 +1,3 @@
-
 export interface MediaItem {
   type: string;
   url: string;
@@ -28,10 +27,31 @@ export interface Feed {
   items: FeedItem[];
 }
 
+export interface BlogContent {
+  url: string;
+  content: string;
+}
+
 export const fetchFeeds = async (): Promise<Feed[]> => {
   const response = await fetch('http://localhost:8000/feeds/');
   if (!response.ok) {
     throw new Error('Failed to fetch feeds');
   }
+  return response.json();
+};
+
+export const fetchBlogContent = async (url: string): Promise<BlogContent> => {
+  const response = await fetch('http://localhost:8000/feeds/extractblog', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch blog content');
+  }
+
   return response.json();
 };

@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { ChevronLeft, Globe, MessageSquare, X, Menu, Loader2 } from "lucide-react";
-import { posts } from "../data/posts";
 import Header from "@/components/Header";
 import CategoryBadge from "@/components/CategoryBadge";
 import { format } from "date-fns";
@@ -13,10 +11,22 @@ import ComplexitySlider from "@/components/ComplexitySlider";
 import { useComplexityStore } from "@/hooks/useComplexityStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import TranslationDropdown from "@/components/TranslationDropdown";
+import { useQuery } from "@tanstack/react-query";
+import { fetchBlogContent } from "@/services/feedService";
+import { toast } from "sonner";
 
 const BlogPost = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const post = posts.find(post => post.slug === slug);
+  const location = useLocation();
+  const blogData = location.state?.blogData;
+  
+  const { data: blogContent, isLoading: isLoadingContent } = useQuery({
+    queryKey: ['blogContent', blogData?.link],
+    queryFn: () => fetchBlogContent(blogData?.link),
+    enabled: !!blogData?.link,
+    onError: (error) => {
+      toast.error("Failed to load blog content");
+    }
+  });
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [explanationContent, setExplanationContent] = useState<string>("");
@@ -36,32 +46,13 @@ const BlogPost = () => {
 
   const { addSummary, getSummary } = useBlogSummaryStore();
 
-  const articleVersion = post ? getArticleVersion(post.id.toString()) : null;
-
   useEffect(() => {
-    if (post && !post.content) {
-      post.content = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-
-Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.`;
+    // Reset translation when changing posts
+    if (blogData) {
+      setTranslatedTitle(blogData.title);
+      setTranslatedContent(blogContent?.content || '');
     }
-
-    // Initialize translated content with the original content
-    if (post) {
-      setTranslatedTitle(post.title);
-      setTranslatedContent(post.content);
-    }
-  }, [post]);
-
-  // Use either the translated content or the original/modified content based on complexity settings
-  const displayContent = {
-    title: translatedTitle || (showOriginal ? post?.title : (articleVersion?.title || post?.title) || ""),
-    content: translatedContent || (showOriginal ? post?.content : (articleVersion?.content || post?.content) || ""),
-    ...post
-  };
+  }, [blogData, blogContent]);
 
   const handleSelection = (index: number) => {
     const selection = window.getSelection();
@@ -85,47 +76,7 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
     setSelectedParagraphIndex(null);
   };
 
-  useEffect(() => {
-    setSelectedText("");
-    setExplanationContent("");
-    setShowExplanation(false);
-    setSelectedParagraphIndex(null);
-    
-    // Reset translation when changing posts
-    if (post) {
-      setTranslatedTitle(post.title);
-      setTranslatedContent(post.content);
-    }
-  }, [slug, post]);
-
-  const handleSummaryClick = async () => {
-    if (post && !isSummaryMode) {
-      if (!getSummary(post.id.toString())) {
-        setIsLoadingSummary(true);
-        const summary = await fetchBlogSummary(post.id.toString());
-        addSummary(post.id.toString(), summary);
-        setIsLoadingSummary(false);
-      }
-      setIsSummaryMode(true);
-    } else {
-      setIsSummaryMode(false);
-    }
-  };
-
-  const handleTranslation = (title: string, content: string) => {
-    setTranslatedTitle(title);
-    setTranslatedContent(content);
-  };
-
-  const getCurrentContent = () => {
-    if (!post) return "";
-    if (isSummaryMode) {
-      return getSummary(post.id.toString()) || "";
-    }
-    return translatedContent || (showOriginal ? post.content : (articleVersion?.content || post.content));
-  };
-
-  if (!post) {
+  if (!blogData) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900">
         <Header />
@@ -147,7 +98,7 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
     );
   }
 
-  const paragraphs = getCurrentContent().split("\n\n");
+  const paragraphs = blogContent?.content?.split("\n") || [];
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -162,40 +113,31 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
             Back to all posts
           </Link>
           <div className="flex items-center space-x-2">
-            <CategoryBadge category={post.category} />
+            <CategoryBadge category={blogData.category || 'Uncategorized'} />
             <Button
               variant="outline"
-              onClick={handleSummaryClick}
-              disabled={isLoadingSummary}
+              onClick={() => {
+                toast.info("Summary feature coming soon!");
+              }}
               className="flex items-center gap-2"
             >
               {isLoadingSummary && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isLoadingSummary ? 'Loading...' : (isSummaryMode ? 'Show Original' : 'Show Summary')}
+              Show Summary
             </Button>
-            {post && (
-              <TranslationDropdown
-                blogId={post.id.toString()}
-                originalTitle={showOriginal ? post.title : (articleVersion?.title || post.title)}
-                originalContent={showOriginal ? post.content : (articleVersion?.content || post.content)}
-                onTranslated={handleTranslation}
-              />
-            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <article className="lg:col-span-8 prose dark:prose-invert prose-lg max-w-none">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {displayContent?.title || ''}
+              {blogData.title}
             </h1>
             
             <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
-              <span className="mr-3">{post?.date ? format(new Date(post.date), "MMMM d, yyyy") : ''}</span>
-              <span className="mr-3">•</span>
-              <span>5 min read</span> {/* Hardcoded since readingTime doesn't exist in Post type */}
+              <span className="mr-3">{format(new Date(blogData.pub_date), "MMMM d, yyyy")}</span>
             </div>
             
-            {isLoading ? (
+            {isLoadingContent ? (
               <div className="space-y-4 mt-8">
                 <Skeleton className="h-6 w-3/4 rounded" />
                 <Skeleton className="h-40 w-full rounded" />
@@ -257,33 +199,25 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
             <div className="sticky top-24">
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                  About the author
+                  About this article
                 </h3>
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 mr-3">
-                    {/* Author avatar would go here */}
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      {post?.author?.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {post?.author?.role || 'YC Partner'}
-                    </p>
-                  </div>
-                </div>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a
-                  metus vel nunc tempor sagittis.
+                  {blogData.description}
                 </p>
               </div>
 
-              <div className="mt-6 bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                  Content Complexity
-                </h3>
-                {post && <ComplexitySlider articleId={post.id.toString()} />}
-              </div>
+              {blogData.media && blogData.media.length > 0 && (
+                <div className="mt-6 bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                    Featured Media
+                  </h3>
+                  <img 
+                    src={blogData.media[0].url} 
+                    alt={blogData.title}
+                    className="w-full rounded-lg"
+                  />
+                </div>
+              )}
             </div>
           </aside>
         </div>
