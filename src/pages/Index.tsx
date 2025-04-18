@@ -35,23 +35,7 @@ const Index = () => {
         {latestArticles[0] && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">Featured Post</h2>
-            <BlogCard 
-              post={{
-                id: latestArticles[0].id,
-                title: latestArticles[0].title,
-                excerpt: latestArticles[0].description,
-                coverImage: latestArticles[0].media?.[0]?.url || '/placeholder.svg',
-                date: new Date(latestArticles[0].pub_date).toLocaleDateString(),
-                author: {
-                  name: feeds?.[0]?.name || 'Unknown Author',
-                  role: feeds?.[0]?.category || 'Contributor',
-                  avatar: '/placeholder.svg'
-                },
-                category: feeds?.[0]?.category || 'News',
-                slug: latestArticles[0].id,
-                content: latestArticles[0].description
-              }} 
-            />
+            <BlogCard post={latestArticles[0]} />
           </section>
         )}
 
@@ -77,21 +61,7 @@ const Index = () => {
             {latestArticles.slice(1).map((article) => (
               <BlogCard
                 key={article.id}
-                post={{
-                  id: article.id,
-                  title: article.title,
-                  excerpt: article.description,
-                  coverImage: article.media?.[0]?.url || '/placeholder.svg',
-                  date: new Date(article.pub_date).toLocaleDateString(),
-                  author: {
-                    name: feeds?.[0]?.name || 'Unknown Author',
-                    role: feeds?.[0]?.category || 'Contributor',
-                    avatar: '/placeholder.svg'
-                  },
-                  category: feeds?.[0]?.category || 'News',
-                  slug: article.id,
-                  content: article.description
-                }}
+                post={article}
               />
             ))}
           </div>

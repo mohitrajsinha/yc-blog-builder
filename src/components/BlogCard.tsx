@@ -46,4 +46,3 @@ const BlogCard = ({ post }: BlogCardProps) => {
 };
 
 export default BlogCard;
-
