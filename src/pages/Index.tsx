@@ -1,30 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "../components/Header";
-import FeaturedPost from "../components/FeaturedPost";
 import BlogCard from "../components/BlogCard";
 import InterestsDialog from "../components/InterestsDialog";
-import { getFeaturedPost, getRecentPosts, Post } from "../data/posts";
+import { fetchFeeds } from "../services/feedService";
 import { useInterestsStore } from "../hooks/useInterestsStore";
-import { useCategoriesStore, fetchPostsByCategory } from "../hooks/useCategoriesStore";
 
 const Index = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const featuredPost = getFeaturedPost();
   const { hasSelectedInterests } = useInterestsStore();
-  const { selectedCategory, isLoading } = useCategoriesStore();
+  
+  const { data: feeds, isLoading, error } = useQuery({
+    queryKey: ['feeds'],
+    queryFn: fetchFeeds
+  });
 
-  useEffect(() => {
-    const loadPosts = async () => {
-      if (selectedCategory && selectedCategory !== 'Latest') {
-        const categoryPosts = await fetchPostsByCategory(selectedCategory);
-        setPosts(categoryPosts);
-      } else {
-        setPosts(getRecentPosts(featuredPost?.id));
-      }
-    };
-
-    loadPosts();
-  }, [selectedCategory, featuredPost?.id]);
+  const latestArticles = feeds?.[0]?.items || [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -42,10 +32,26 @@ const Index = () => {
         </div>
 
         {/* Featured Post */}
-        {featuredPost && (
+        {latestArticles[0] && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">Featured Post</h2>
-            <FeaturedPost post={featuredPost} />
+            <BlogCard 
+              post={{
+                id: latestArticles[0].id,
+                title: latestArticles[0].title,
+                excerpt: latestArticles[0].description,
+                coverImage: latestArticles[0].media?.[0]?.url || '/placeholder.svg',
+                date: new Date(latestArticles[0].pub_date).toLocaleDateString(),
+                author: {
+                  name: feeds?.[0]?.name || 'Unknown Author',
+                  role: feeds?.[0]?.category || 'Contributor',
+                  avatar: '/placeholder.svg'
+                },
+                category: feeds?.[0]?.category || 'News',
+                slug: latestArticles[0].id,
+                content: latestArticles[0].description
+              }} 
+            />
           </section>
         )}
 
@@ -55,9 +61,38 @@ const Index = () => {
             <h2 className="text-2xl font-bold text-foreground">Latest Articles</h2>
           </div>
           
+          {isLoading && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Loading articles...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-red-500">Error loading articles. Please try again later.</p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <BlogCard key={post.id} post={post} />
+            {latestArticles.slice(1).map((article) => (
+              <BlogCard
+                key={article.id}
+                post={{
+                  id: article.id,
+                  title: article.title,
+                  excerpt: article.description,
+                  coverImage: article.media?.[0]?.url || '/placeholder.svg',
+                  date: new Date(article.pub_date).toLocaleDateString(),
+                  author: {
+                    name: feeds?.[0]?.name || 'Unknown Author',
+                    role: feeds?.[0]?.category || 'Contributor',
+                    avatar: '/placeholder.svg'
+                  },
+                  category: feeds?.[0]?.category || 'News',
+                  slug: article.id,
+                  content: article.description
+                }}
+              />
             ))}
           </div>
         </section>
