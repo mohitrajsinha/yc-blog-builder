@@ -23,8 +23,10 @@ const BlogPost = () => {
     queryKey: ['blogContent', blogData?.link],
     queryFn: () => fetchBlogContent(blogData?.link),
     enabled: !!blogData?.link,
-    onError: (error) => {
-      toast.error("Failed to load blog content");
+    meta: {
+      onError: () => {
+        toast.error("Failed to load blog content");
+      }
     }
   });
 
@@ -47,7 +49,6 @@ const BlogPost = () => {
   const { addSummary, getSummary } = useBlogSummaryStore();
 
   useEffect(() => {
-    // Reset translation when changing posts
     if (blogData) {
       setTranslatedTitle(blogData.title);
       setTranslatedContent(blogContent?.content || '');
@@ -124,13 +125,22 @@ const BlogPost = () => {
               {isLoadingSummary && <Loader2 className="h-4 w-4 animate-spin" />}
               Show Summary
             </Button>
+            <TranslationDropdown
+              blogId={blogData.id}
+              originalTitle={blogData.title}
+              originalContent={blogContent?.content || ''}
+              onTranslated={(title, content) => {
+                setTranslatedTitle(title);
+                setTranslatedContent(content);
+              }}
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <article className="lg:col-span-8 prose dark:prose-invert prose-lg max-w-none">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {blogData.title}
+              {translatedTitle}
             </h1>
             
             <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
@@ -148,7 +158,7 @@ const BlogPost = () => {
               </div>
             ) : (
               <>
-                {paragraphs.map((paragraph, index) => (
+                {translatedContent.split("\n").map((paragraph, index) => (
                   <div key={index}>
                     <ContextMenu>
                       <ContextMenuTrigger>
