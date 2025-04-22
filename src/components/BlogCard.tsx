@@ -1,20 +1,36 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import CategoryBadge from "./CategoryBadge";
 import { FeedItem } from "@/services/feedService";
+import { useInterestsStore } from "@/hooks/useInterestsStore";
 
 interface BlogCardProps {
-  post: FeedItem;
+  post: FeedItem | {
+    id: string;
+    title: string;
+    link: string;
+    pub_date: string;
+    description: string;
+  };
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
+  const { addBlogDescription } = useInterestsStore();
+
+  const handleClick = () => {
+    // Add the blog description to the set for better recommendations
+    if (post.description) {
+      addBlogDescription(post.description);
+    }
+  };
+
   return (
     <div className="group flex flex-col h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300">
       <Link 
         to={`/post/${post.id}`} 
         state={{ blogData: post }}
         className="overflow-hidden"
+        onClick={handleClick}
       >
         {post.media && post.media[0] && (
           <img
@@ -32,6 +48,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
           to={`/post/${post.id}`}
           state={{ blogData: post }}
           className="mb-2"
+          onClick={handleClick}
         >
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yc-orange transition-colors">
             {post.title}

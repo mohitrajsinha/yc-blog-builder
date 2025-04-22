@@ -1,20 +1,28 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import Header from "../components/Header";
 import BlogCard from "../components/BlogCard";
 import InterestsDialog from "../components/InterestsDialog";
-import { fetchFeeds } from "../services/feedService";
 import { useInterestsStore } from "../hooks/useInterestsStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { hasSelectedInterests } = useInterestsStore();
+  const { 
+    hasSelectedInterests, 
+    searchResults, 
+    isLoading, 
+    error,
+    selectedInterests,
+    fetchSearchResults
+  } = useInterestsStore();
   
-  const { data: feeds, isLoading, error } = useQuery({
-    queryKey: ['feeds'],
-    queryFn: fetchFeeds
-  });
+  // Fetch search results on mount if there are stored interests
+  useEffect(() => {
+    if (hasSelectedInterests || selectedInterests.length > 0) {
+      fetchSearchResults();
+    }
+  }, [hasSelectedInterests, selectedInterests, fetchSearchResults]);
 
-  const latestArticles = feeds?.[0]?.items || [];
+  const displayArticles = searchResults.map(result => result.item);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -22,7 +30,7 @@ const Index = () => {
       
       {!hasSelectedInterests && <InterestsDialog />}
       
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         {/* Hero section */}
         <div className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Y Combinator Blog</h1>
@@ -31,23 +39,41 @@ const Index = () => {
           </p>
         </div>
 
+        {/* Empty state */}
+        {!hasSelectedInterests && !isLoading && !error && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              Select your interests to see personalized content.
+            </p>
+          </div>
+        )}
+
         {/* Featured Post */}
-        {latestArticles[0] && (
+        {displayArticles[0] && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">Featured Post</h2>
-            <BlogCard post={latestArticles[0]} />
+            <BlogCard post={displayArticles[0]} />
           </section>
         )}
 
         {/* Recent Posts */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Latest Articles</h2>
+            <h2 className="text-2xl font-bold text-foreground">
+              {hasSelectedInterests ? 'Recommended Articles' : 'Latest Articles'}
+            </h2>
           </div>
           
           {isLoading && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Loading articles...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array(6).fill(0).map((_, index) => (
+                <div key={index} className="flex flex-col space-y-3">
+                  <Skeleton className="h-48 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
+              ))}
             </div>
           )}
 
@@ -57,14 +83,16 @@ const Index = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {latestArticles.slice(1).map((article) => (
-              <BlogCard
-                key={article.id}
-                post={article}
-              />
-            ))}
-          </div>
+          {!isLoading && !error && displayArticles.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayArticles.slice(1).map((article) => (
+                <BlogCard
+                  key={article.id}
+                  post={article}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Newsletter */}
@@ -90,7 +118,7 @@ const Index = () => {
             </form>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* Footer */}
       <footer className="bg-card border-t border-border py-12">

@@ -18,27 +18,33 @@ export interface FeedItem {
   content_encoded: string | null;
 }
 
-export interface Feed {
-  id: string;
-  name: string;
-  url: string;
-  category: string;
-  last_updated: string;
-  items: FeedItem[];
-}
-
 export interface BlogContent {
   url: string;
   content: string;
 }
 
-export const fetchFeeds = async (): Promise<Feed[]> => {
-  const response = await fetch('http://localhost:8000/feeds/');
-  if (!response.ok) {
-    throw new Error('Failed to fetch feeds');
-  }
-  return response.json();
-};
+export interface SearchResult {
+  feed: {
+    id: string;
+    name: string;
+    category: string;
+  };
+  item: {
+    id: string;
+    title: string;
+    link: string;
+    pub_date: string;
+    description: string;
+  };
+  relevance_score: number;
+  matched_content: string;
+}
+
+export interface SearchResponse {
+  status: string;
+  query: string;
+  results: SearchResult[];
+}
 
 export const fetchBlogContent = async (url: string): Promise<BlogContent> => {
   const response = await fetch('http://localhost:8000/feeds/extractblog', {
@@ -51,6 +57,22 @@ export const fetchBlogContent = async (url: string): Promise<BlogContent> => {
 
   if (!response.ok) {
     throw new Error('Failed to fetch blog content');
+  }
+
+  return response.json();
+};
+
+export const searchFeeds = async (query: string, k: number = 5): Promise<SearchResponse> => {
+  const response = await fetch('http://localhost:8000/feeds/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, k }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to search feeds');
   }
 
   return response.json();

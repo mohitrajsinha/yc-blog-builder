@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
 import { useInterestsStore } from "@/hooks/useInterestsStore";
 
 const InterestsDialog = () => {
@@ -11,7 +10,9 @@ const InterestsDialog = () => {
     selectedInterests, 
     addInterest, 
     removeInterest, 
-    setHasSelectedInterests 
+    setHasSelectedInterests,
+    fetchSearchResults,
+    isLoading
   } = useInterestsStore();
   
   const [localSelected, setLocalSelected] = useState<string[]>([]);
@@ -30,8 +31,9 @@ const InterestsDialog = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (localSelected.length > 0) {
+      await fetchSearchResults();
       setHasSelectedInterests(true);
     }
   };
@@ -69,10 +71,17 @@ const InterestsDialog = () => {
         <div className="flex flex-col gap-2">
           <Button
             onClick={handleContinue}
-            disabled={localSelected.length === 0}
+            disabled={localSelected.length === 0 || isLoading}
             className="w-full bg-yc-orange hover:bg-yc-orange-dark text-white"
           >
-            Continue to YC Blog
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Continue to YC Blog'
+            )}
           </Button>
           {localSelected.length === 0 && (
             <p className="text-sm text-center text-muted-foreground">
