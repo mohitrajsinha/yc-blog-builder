@@ -1,5 +1,5 @@
-
 import { create } from 'zustand';
+import { API_ENDPOINTS } from '../config/api';
 
 interface Translation {
   content: string;
@@ -41,26 +41,63 @@ export const useTranslationStore = create<TranslationState>((set, get) => ({
     get().loadingLanguages[language] || false,
 }));
 
-// Mock translation API call
-export const fetchTranslation = (blogId: string, language: string, originalContent: string, originalTitle: string): Promise<Translation> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Mock translations based on language
-      let titlePrefix = '';
-      let contentPrefix = '';
-      
-      if (language === 'hindi') {
-        titlePrefix = 'हिंदी अनुवाद: ';
-        contentPrefix = 'हिंदी अनुवाद: ';
-      } else if (language === 'punjabi') {
-        titlePrefix = 'ਪੰਜਾਬੀ ਅਨੁਵਾਦ: ';
-        contentPrefix = 'ਪੰਜਾਬੀ ਅਨੁਵਾਦ: ';
-      }
-      
-      resolve({
-        content: `${contentPrefix}${originalContent}`,
-        title: `${titlePrefix}${originalTitle}`
-      });
-    }, 2000); // 2 second mock delay
-  });
+// Translation API call
+export const fetchTranslation = async (blogId: string, language: string, originalContent: string, originalTitle: string): Promise<Translation> => {
+  try {
+    // Map language names to language codes
+    const languageCodeMap: Record<string, string> = {
+      'hindi': 'hi',
+      'punjabi': 'pa'
+    };
+
+    const targetLanguage = languageCodeMap[language] || 'en';
+
+    // First translate the title
+    const titleResponse = await fetch(API_ENDPOINTS.FEEDS.GROQ, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: originalTitle,
+        operation: "translate",
+        target_language: targetLanguage,
+        max_tokens: 1024,
+        temperature: 0.7,
+        top_p: 1,
+        top_k: 50
+      })
+    });
+
+    const titleData = await titleResponse.json();
+    const translatedTitle = titleData.translation;
+
+    // Then translate the content
+    const contentResponse = await fetch(API_ENDPOINTS.FEEDS.GROQ, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: originalContent,
+        operation: "translate",
+        target_language: targetLanguage,
+        max_tokens: 1024,
+        temperature: 0.7,
+        top_p: 1,
+        top_k: 50
+      })
+    });
+
+    const contentData = await contentResponse.json();
+    const translatedContent = contentData.translation;
+
+    return {
+      title: translatedTitle,
+      content: translatedContent
+    };
+  } catch (error) {
+    console.error('Error fetching translation:', error);
+    throw error;
+  }
 };

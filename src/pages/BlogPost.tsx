@@ -14,6 +14,8 @@ import TranslationDropdown from "@/components/TranslationDropdown";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBlogContent } from "@/services/feedService";
 import { toast } from "sonner";
+import axios from "axios";
+import { API_ENDPOINTS } from '../config/api';
 
 const BlogPost = () => {
   const location = useLocation();
@@ -38,6 +40,7 @@ const BlogPost = () => {
   const [isLoadingSummary, setIsLoadingSummary] = useState(false);
   const [translatedTitle, setTranslatedTitle] = useState<string>("");
   const [translatedContent, setTranslatedContent] = useState<string>("");
+  const [summary, setSummary] = useState<string>("");
 
   const { 
     complexityLevel, 
@@ -62,12 +65,27 @@ const BlogPost = () => {
     }
   };
 
-  const handleExplainMore = (index: number) => {
+  const handleExplainMore = async (index: number) => {
     if (selectedText) {
-      console.log("Explain more about:", selectedText);
-      setExplanationContent(`Explanation for: "${selectedText}"`);
-      setShowExplanation(true);
-      setSelectedParagraphIndex(index);
+      try {
+        const response = await axios.post(API_ENDPOINTS.FEEDS.GROQ, {
+          text: selectedText,
+          operation: "explain",
+          mode: "default",
+          target_language: "en",
+          max_tokens: 1024,
+          temperature: 0.7,
+          top_p: 1,
+          top_k: 50
+        });
+        
+        setExplanationContent(response.data.explanation);
+        setShowExplanation(true);
+        setSelectedParagraphIndex(index);
+      } catch (error) {
+        toast.error("Failed to get explanation");
+        console.error("Error getting explanation:", error);
+      }
     }
   };
 
@@ -75,6 +93,37 @@ const BlogPost = () => {
     setShowExplanation(false);
     setExplanationContent("");
     setSelectedParagraphIndex(null);
+  };
+
+  const handleShowSummary = async () => {
+    if (isSummaryMode) {
+      setIsSummaryMode(false);
+      return;
+    }
+
+    if (!blogContent?.content) return;
+    
+    setIsLoadingSummary(true);
+    try {
+      const response = await axios.post(API_ENDPOINTS.FEEDS.GROQ, {
+        text: blogContent.content,
+        operation: "summarize",
+        mode: "default",
+        target_language: "en",
+        max_tokens: 1024,
+        temperature: 0.7,
+        top_p: 1,
+        top_k: 50
+      });
+      
+      setSummary(response.data.summary);
+      setIsSummaryMode(true);
+    } catch (error) {
+      toast.error("Failed to generate summary");
+      console.error("Error generating summary:", error);
+    } finally {
+      setIsLoadingSummary(false);
+    }
   };
 
   if (!blogData) {
@@ -117,13 +166,11 @@ const BlogPost = () => {
             <CategoryBadge category={blogData.category || 'Uncategorized'} />
             <Button
               variant="outline"
-              onClick={() => {
-                toast.info("Summary feature coming soon!");
-              }}
+              onClick={handleShowSummary}
               className="flex items-center gap-2"
             >
               {isLoadingSummary && <Loader2 className="h-4 w-4 animate-spin" />}
-              Show Summary
+              {isSummaryMode ? "Show Full Article" : "Show Summary"}
             </Button>
             <TranslationDropdown
               blogId={blogData.id}
@@ -155,6 +202,15 @@ const BlogPost = () => {
                 <Skeleton className="h-6 w-full rounded" />
                 <Skeleton className="h-6 w-4/5 rounded" />
                 <Skeleton className="h-40 w-full rounded" />
+              </div>
+            ) : isSummaryMode ? (
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                  Article Summary
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                  {summary}
+                </p>
               </div>
             ) : (
               <>

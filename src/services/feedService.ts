@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from '../config/api';
+
 export interface MediaItem {
   type: string;
   url: string;
@@ -47,7 +49,7 @@ export interface SearchResponse {
 }
 
 export const fetchBlogContent = async (url: string): Promise<BlogContent> => {
-  const response = await fetch('http://localhost:8000/feeds/extractblog', {
+  const response = await fetch(API_ENDPOINTS.FEEDS.EXTRACT_BLOG, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -63,7 +65,7 @@ export const fetchBlogContent = async (url: string): Promise<BlogContent> => {
 };
 
 export const searchFeeds = async (query: string, k: number = 5): Promise<SearchResponse> => {
-  const response = await fetch('http://localhost:8000/feeds/search', {
+  const response = await fetch(API_ENDPOINTS.FEEDS.SEARCH, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
