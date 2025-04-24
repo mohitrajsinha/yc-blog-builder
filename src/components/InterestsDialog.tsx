@@ -80,7 +80,7 @@ const InterestsDialog = () => {
                 Loading...
               </>
             ) : (
-              'Continue to YC Blog'
+              'Continue to Lens'
             )}
           </Button>
           {localSelected.length === 0 && (
