@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, X, Settings, ChevronDown, Loader2 } from "lucide-react";
@@ -56,8 +55,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <span className="text-xl font-bold text-yc-orange">Y Combinator</span>
-            <span className="ml-1 text-xl font-normal text-gray-700 dark:text-gray-300">Blog</span>
+            <span className="text-xl font-bold text-yc-orange">Lens</span>
           </Link>
             
           {/* Desktop navigation */}
