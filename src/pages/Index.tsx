@@ -22,7 +22,10 @@ const Index = () => {
     }
   }, [hasSelectedInterests, selectedInterests, fetchSearchResults]);
 
-  const displayArticles = searchResults.map(result => result.item);
+  const displayArticles = searchResults.map(result => ({
+    ...result.item,
+    media: result.media
+  }));
 
   return (
     <div className="min-h-screen bg-background text-foreground">

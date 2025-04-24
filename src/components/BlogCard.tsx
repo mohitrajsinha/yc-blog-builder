@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import CategoryBadge from "./CategoryBadge";
-import { FeedItem } from "@/services/feedService";
+import { FeedItem, SearchResult } from "@/services/feedService";
 import { useInterestsStore } from "@/hooks/useInterestsStore";
 
 interface BlogCardProps {
@@ -11,6 +11,20 @@ interface BlogCardProps {
     link: string;
     pub_date: string;
     description: string;
+    media?: {
+      images: string[];
+      all_media: Array<{
+        id: number;
+        item_id: string;
+        type: string;
+        url: string;
+        width: string;
+        height: string;
+        medium: string;
+        description: string | null;
+        length: number | null;
+      }>;
+    };
   };
 }
 
@@ -24,6 +38,22 @@ const BlogCard = ({ post }: BlogCardProps) => {
     }
   };
 
+  const getImageUrl = () => {
+    if (post.media) {
+      // First try to get from images array
+      if (post.media.images && post.media.images.length > 0) {
+        return post.media.images[0];
+      }
+      // Then try to get from all_media array
+      if (post.media.all_media && post.media.all_media.length > 0) {
+        return post.media.all_media[0].url;
+      }
+    }
+    return null;
+  };
+
+  const imageUrl = getImageUrl();
+
   return (
     <div className="group flex flex-col h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300">
       <Link 
@@ -32,9 +62,9 @@ const BlogCard = ({ post }: BlogCardProps) => {
         className="overflow-hidden"
         onClick={handleClick}
       >
-        {post.media && post.media[0] && (
+        {imageUrl && (
           <img
-            src={post.media[0].url}
+            src={imageUrl}
             alt={post.title}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />

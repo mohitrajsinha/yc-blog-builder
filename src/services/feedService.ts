@@ -38,6 +38,20 @@ export interface SearchResult {
     pub_date: string;
     description: string;
   };
+  media: {
+    images: string[];
+    all_media: Array<{
+      id: number;
+      item_id: string;
+      type: string;
+      url: string;
+      width: string;
+      height: string;
+      medium: string;
+      description: string | null;
+      length: number | null;
+    }>;
+  };
   relevance_score: number;
   matched_content: string;
 }
