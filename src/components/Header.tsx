@@ -1,34 +1,20 @@
+
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, X, Settings, ChevronDown, Loader2 } from "lucide-react";
-import SearchBar from "./SearchBar";
+import { Link } from "react-router-dom";
+import { Search, Menu, X } from "lucide-react";
+import { CategoryDropdown } from "./header/CategoryDropdown";
+import { SettingsDropdown } from "./header/SettingsDropdown";
+import { MobileMenu } from "./header/MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal
-} from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { useFontSize } from "../hooks/useFontSize";
-import { useCategoriesStore, fetchPostsByCategory } from "../hooks/useCategoriesStore";
+import SearchBar from "./SearchBar";
 
 interface HeaderProps {
   className?: string;
 }
 
-const CATEGORIES = ["Latest", "Startups", "Technology", "Business"];
-
 const Header: React.FC<HeaderProps> = ({ className }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { setFontSize, currentFontSize } = useFontSize();
-  const { selectedCategory, setSelectedCategory, isLoading, setLoading } = useCategoriesStore();
-  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -36,18 +22,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
   const toggleSearch = () => {
     setSearchOpen(!searchOpen);
-  };
-
-  const handleFontSizeChange = (size: string) => {
-    setFontSize(size);
-  };
-
-  const handleCategorySelect = async (category: string) => {
-    setSelectedCategory(category);
-    setLoading(true);
-    await fetchPostsByCategory(category);
-    setLoading(false);
-    navigate('/');
   };
 
   return (
@@ -60,21 +34,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {selectedCategory || 'Categories'} <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {CATEGORIES.map((category) => (
-                  <DropdownMenuItem key={category} onClick={() => handleCategorySelect(category)}>
-                    {category}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CategoryDropdown />
           </nav>
 
           <div className="flex items-center">
@@ -87,80 +47,13 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               >
                 <Search size={20} />
               </button>
-              
-              {/* Settings Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors">
-                    <Settings size={20} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <span>Font Size ({currentFontSize})</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                        <DropdownMenuItem onClick={() => handleFontSizeChange("small")}>
-                          Small
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFontSizeChange("medium")}>
-                          Medium
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFontSizeChange("large")}>
-                          Large
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                  <DropdownMenuItem asChild>
-                    <Link to="/complexity-settings" className="w-full">
-                      Content Complexity
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
+              <SettingsDropdown />
               <ThemeToggle />
             </div>
             
             {/* Mobile - only theme toggle and hamburger */}
             <div className="flex md:hidden items-center space-x-2">
-              {/* Mobile Settings Button */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors">
-                    <Settings size={20} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <span>Font Size ({currentFontSize})</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                        <DropdownMenuItem onClick={() => handleFontSizeChange("small")}>
-                          Small
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFontSizeChange("medium")}>
-                          Medium
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFontSizeChange("large")}>
-                          Large
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                  <DropdownMenuItem asChild>
-                    <Link to="/complexity-settings" className="w-full">
-                      Content Complexity
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
+              <SettingsDropdown />
               <ThemeToggle />
               <button
                 onClick={toggleMobileMenu}
@@ -174,31 +67,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         </div>
 
         {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden py-4 animate-fade-in">
-            <div className="flex flex-col space-y-3">
-              <Link to="/" className="text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors py-2">
-                Latest
-              </Link>
-              <Link to="/categories/startups" className="text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors py-2">
-                Startups
-              </Link>
-              <Link to="/categories/technology" className="text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors py-2">
-                Technology
-              </Link>
-              <Link to="/categories/business" className="text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors py-2">
-                Business
-              </Link>
-              <button
-                onClick={toggleSearch}
-                className="flex items-center text-gray-600 dark:text-gray-400 hover:text-yc-orange transition-colors py-2"
-              >
-                <Search size={18} className="mr-2" />
-                <span>Search</span>
-              </button>
-            </div>
-          </nav>
-        )}
+        {mobileMenuOpen && <MobileMenu toggleSearch={toggleSearch} />}
 
         {/* Search overlay */}
         {searchOpen && (
