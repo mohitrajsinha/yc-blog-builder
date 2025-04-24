@@ -15,7 +15,6 @@ const Index = () => {
     fetchSearchResults
   } = useInterestsStore();
   
-  // Fetch search results on mount if there are stored interests
   useEffect(() => {
     if (hasSelectedInterests || selectedInterests.length > 0) {
       fetchSearchResults();
@@ -34,7 +33,6 @@ const Index = () => {
       {!hasSelectedInterests && <InterestsDialog />}
       
       <div className="container mx-auto px-4 py-8">
-        {/* Hero section */}
         <div className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Lens</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
@@ -42,7 +40,6 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Empty state */}
         {!hasSelectedInterests && !isLoading && !error && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
@@ -51,7 +48,6 @@ const Index = () => {
           </div>
         )}
 
-        {/* Featured Post */}
         {displayArticles[0] && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">Featured Post</h2>
@@ -59,7 +55,6 @@ const Index = () => {
           </section>
         )}
 
-        {/* Recent Posts */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-foreground">
@@ -98,7 +93,6 @@ const Index = () => {
           )}
         </section>
 
-        {/* Newsletter */}
         <section className="bg-card border border-border rounded-lg p-8 mb-12">
           <div className="max-w-xl mx-auto text-center">
             <h3 className="text-2xl font-bold text-foreground mb-3">Subscribe to Lens Newsletter</h3>
@@ -122,44 +116,43 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="bg-card border-t border-border py-12">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between mb-8">
               <div className="mb-8 md:mb-0">
                 <div className="flex items-center mb-4">
-                  <span className="text-xl font-bold text-yc-orange">Lens</span>
+                  <span className="text-xl font-bold text-foreground">Lens</span>
                 </div>
                 <p className="text-muted-foreground max-w-md">
-                  Insights and perspectives on current events and global news.
+                  Your lens into the world of news, technology, and current events.
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-4">Categories</h4>
                   <ul className="space-y-2">
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Startups</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Technology</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Fundraising</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Growth</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Technology</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Business</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Science</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">World</a></li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
                   <ul className="space-y-2">
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">YC Library</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Startup School</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Work at a Startup</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Apply to YC</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Archive</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Writing</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Guidelines</a></li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-4">Y Combinator</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-4">Connect</h4>
                   <ul className="space-y-2">
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">About</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Companies</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Events</a></li>
-                    <li><a href="#" className="text-muted-foreground hover:text-yc-orange transition-colors">Contact</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">RSS Feed</a></li>
+                    <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Twitter</a></li>
                   </ul>
                 </div>
               </div>
