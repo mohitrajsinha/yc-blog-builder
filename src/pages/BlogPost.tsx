@@ -10,7 +10,6 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import ComplexitySlider from "@/components/ComplexitySlider";
 import { useComplexityStore } from "@/hooks/useComplexityStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import TranslationDropdown from "@/components/TranslationDropdown";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBlogContent } from "@/services/feedService";
 import { toast } from "sonner";
@@ -172,15 +171,6 @@ const BlogPost = () => {
               {isLoadingSummary && <Loader2 className="h-4 w-4 animate-spin" />}
               {isSummaryMode ? "Show Full Article" : "Show Summary"}
             </Button>
-            <TranslationDropdown
-              blogId={blogData.id}
-              originalTitle={blogData.title}
-              originalContent={blogContent?.content || ''}
-              onTranslated={(title, content) => {
-                setTranslatedTitle(title);
-                setTranslatedContent(content);
-              }}
-            />
           </div>
         </div>
 
