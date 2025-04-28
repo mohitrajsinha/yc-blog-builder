@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import CategoryBadge from "./CategoryBadge";
@@ -18,20 +19,20 @@ const BlogCard = ({ post }: BlogCardProps) => {
   };
 
   const getImageUrl = () => {
-    if (!post.media || post.media.length === 0) return null;
+    if (!post.media) return null;
     
     // If media is an array of MediaItems
-    if (Array.isArray(post.media)) {
+    if (Array.isArray(post.media) && post.media.length > 0) {
       return post.media[0]?.url;
     }
     
     // If media has images array
-    if ('images' in post.media && post.media.images.length > 0) {
+    if (post.media && typeof post.media === 'object' && 'images' in post.media && Array.isArray(post.media.images) && post.media.images.length > 0) {
       return post.media.images[0];
     }
     
     // If media has all_media array
-    if ('all_media' in post.media && post.media.all_media.length > 0) {
+    if (post.media && typeof post.media === 'object' && 'all_media' in post.media && Array.isArray(post.media.all_media) && post.media.all_media.length > 0) {
       return post.media.all_media[0].url;
     }
     
