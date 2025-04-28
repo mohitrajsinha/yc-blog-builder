@@ -1,54 +1,40 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import CategoryBadge from "./CategoryBadge";
-import { FeedItem, SearchResult } from "@/services/feedService";
+import { FeedItem } from "@/services/feedService";
 import { useInterestsStore } from "@/hooks/useInterestsStore";
 
 interface BlogCardProps {
-  post: FeedItem | {
-    id: string;
-    title: string;
-    link: string;
-    pub_date: string;
-    description: string;
-    media?: {
-      images: string[];
-      all_media: Array<{
-        id: number;
-        item_id: string;
-        type: string;
-        url: string;
-        width: string;
-        height: string;
-        medium: string;
-        description: string | null;
-        length: number | null;
-      }>;
-    };
-  };
+  post: FeedItem;
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
   const { addBlogDescription } = useInterestsStore();
 
   const handleClick = () => {
-    // Add the blog description to the set for better recommendations
     if (post.description) {
       addBlogDescription(post.description);
     }
   };
 
   const getImageUrl = () => {
-    if (post.media) {
-      // First try to get from images array
-      if (post.media.images && post.media.images.length > 0) {
-        return post.media.images[0];
-      }
-      // Then try to get from all_media array
-      if (post.media.all_media && post.media.all_media.length > 0) {
-        return post.media.all_media[0].url;
-      }
+    if (!post.media || post.media.length === 0) return null;
+    
+    // If media is an array of MediaItems
+    if (Array.isArray(post.media)) {
+      return post.media[0]?.url;
     }
+    
+    // If media has images array
+    if ('images' in post.media && post.media.images.length > 0) {
+      return post.media.images[0];
+    }
+    
+    // If media has all_media array
+    if ('all_media' in post.media && post.media.all_media.length > 0) {
+      return post.media.all_media[0].url;
+    }
+    
     return null;
   };
 

@@ -164,7 +164,7 @@ const BlogPost = () => {
             Back to all posts
           </Link>
           <div className="flex items-center space-x-2">
-            <CategoryBadge category={blogData.category || 'Uncategorized'} />
+            <CategoryBadge category={blogData?.category || 'Uncategorized'} />
             <Button
               variant="outline"
               onClick={handleShowSummary}
@@ -178,8 +178,6 @@ const BlogPost = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <article className="lg:col-span-8 prose dark:prose-invert prose-lg max-w-none">
-            <ComplexitySlider articleId={blogData?.id} />
-            
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               {displayTitle}
             </h1>
@@ -258,7 +256,7 @@ const BlogPost = () => {
           </article>
 
           <aside className="lg:col-span-4 space-y-6">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-6">
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
                   About this article
@@ -268,8 +266,14 @@ const BlogPost = () => {
                 </p>
               </div>
 
+              {blogData?.id && (
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                  <ComplexitySlider articleId={blogData.id} />
+                </div>
+              )}
+
               {blogData.media && blogData.media.length > 0 && (
-                <div className="mt-6 bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
                   <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
                     Featured Media
                   </h3>
