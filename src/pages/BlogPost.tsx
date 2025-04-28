@@ -125,6 +125,10 @@ const BlogPost = () => {
     }
   };
 
+  const currentVersion = getArticleVersion(blogData?.id);
+  const displayTitle = currentVersion?.title || translatedTitle;
+  const displayContent = currentVersion?.content || translatedContent;
+
   if (!blogData) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -146,8 +150,6 @@ const BlogPost = () => {
       </div>
     );
   }
-
-  const paragraphs = blogContent?.content?.split("\n") || [];
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -176,12 +178,16 @@ const BlogPost = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <article className="lg:col-span-8 prose dark:prose-invert prose-lg max-w-none">
+            <ComplexitySlider articleId={blogData?.id} />
+            
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {translatedTitle}
+              {displayTitle}
             </h1>
             
             <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
-              <span className="mr-3">{format(new Date(blogData.pub_date), "MMMM d, yyyy")}</span>
+              <span className="mr-3">
+                {format(new Date(blogData.pub_date), "MMMM d, yyyy")}
+              </span>
             </div>
             
             {isLoadingContent ? (
@@ -204,7 +210,7 @@ const BlogPost = () => {
               </div>
             ) : (
               <>
-                {translatedContent.split("\n").map((paragraph, index) => (
+                {displayContent.split("\n").map((paragraph, index) => (
                   <div key={index}>
                     <ContextMenu>
                       <ContextMenuTrigger>

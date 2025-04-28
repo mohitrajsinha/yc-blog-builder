@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Define types for our state
 interface ArticleVersion {
   title: string;
   content: string;
@@ -29,10 +28,10 @@ interface ComplexityState {
 export const useComplexityStore = create<ComplexityState>()(
   persist(
     (set, get) => ({
-      complexityLevel: 0, // Default level
+      complexityLevel: 1,
       setComplexityLevel: (level: number) => set({ complexityLevel: level }),
       
-      showOriginal: true, // Default to showing original content
+      showOriginal: true,
       setShowOriginal: (show: boolean) => set({ showOriginal: show }),
       
       articleVersions: {},
@@ -50,19 +49,18 @@ export const useComplexityStore = create<ComplexityState>()(
       getArticleVersion: (articleId: string) => {
         const state = get();
         if (state.showOriginal) {
-          return null; // Return null to indicate that original content should be used
+          return null;
         }
         const versions = state.articleVersions[articleId];
-        return versions && versions[state.complexityLevel] 
-          ? versions[state.complexityLevel] 
-          : null;
+        return versions && versions[state.complexityLevel] || null;
       },
       
       isLoading: false,
-      setIsLoading: (loading: boolean) => set({ isLoading: loading })
+      setIsLoading: (loading: boolean) => set({ isLoading: loading }),
     }),
     {
       name: 'complexity-storage',
     }
   )
 );
+
